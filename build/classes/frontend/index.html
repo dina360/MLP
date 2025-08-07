@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LanguageID Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+SA+Hand:wght@600&family=Poppins:wght@700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --primary: #006600;
+      
+      --dark: #333333;
+      --muted: #666666;
+      --radius: 8px;
+      --gap: 1rem;
+      /* Mode sombre */
+      --bg-night: #000000;
+      --text-night: #ffffff;
+      --card-night: #1a1a1a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex;
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode {
+      background: var(--bg-night);
+      color: var(--text-night);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--card);
+      padding: var(--gap);
+      border-right: 1px solid #ddd;
+      transition: background .3s;
+    }
+    body.dark-mode .sidebar {
+      background: var(--card-night);
+    }
+    .logo {
+      font-family: 'Edu SA Hand', cursive;
+      font-size: 1.8rem;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: var(--gap);
+    }
+    .nav-item {
+      padding: .75rem 1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      font-weight: 600;
+    }
+    .nav-item.active,
+    .nav-item:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Main & header */
+    .main { flex: 1; display: flex; flex-direction: column; }
+    header {
+      background: var(--primary);
+      padding: var(--gap);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .title {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: 1.4rem;
+      color: #fff;
+      font-weight: 700;
+    }
+    .actions { display: flex; align-items: center; gap: .75rem; }
+
+    /* Icon buttons */
+    .icon-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      padding: .5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .icon-btn:hover {
+      background: rgba(255,255,255,0.35);
+    }
+    .btn-icon { width: 1.5rem; height: 1.5rem; }
+
+    /* Dropdown */
+    .action-dropdown {
+      position: absolute;
+      top: 3.5rem;
+      right: var(--gap);
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: .75rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+      transition: background .3s;
+    }
+    body.dark-mode .action-dropdown {
+      background: var(--card-night);
+    }
+    .action-dropdown label {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .5rem;
+      cursor: pointer;
+      color: var(--dark);
+      transition: color .3s;
+    }
+    body.dark-mode .action-dropdown label {
+      color: var(--text-night);
+    }
+    .action-dropdown label:last-child { margin-bottom: 0; }
+
+    /* Container & panels */
+    .container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      background: var(--bg);
+      transition: background .3s;
+    }
+    body.dark-mode .container {
+      background: var(--bg-night);
+    }
+    section {
+      flex: 1;
+      padding: var(--gap);
+      overflow-y: auto;
+      background: var(--card);
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode section {
+      background: var(--card-night);
+      color: var(--text-night);
+    }
+    .hidden { display: none; }
+
+    /* Stats grid & cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--gap);
+    }
+    .card {
+      background: var(--card);
+      padding: var(--gap);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      position: relative;
+      transition: transform .2s, box-shadow .2s, background .3s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    body.dark-mode .card {
+      background: var(--card-night);
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: .5rem;
+      color: var(--dark);
+    }
+    body.dark-mode .card h3 {
+      color: var(--text-night);
+    }
+    .card p {
+      font-size: .95rem;
+      color: var(--muted);
+    }
+    body.dark-mode .card p {
+      color: #bbb;
+    }
+
+    /* Special card “Classes” */
+    .card-title {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: 1.1rem;
+      margin-bottom: .5rem;
+      color: var(--dark);
+    }
+    body.dark-mode .card-title {
+      color: var(--text-night);
+    }
+    #classesContainer {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: .75rem;
+      max-height: 160px;
+      overflow-y: auto;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      z-index: 20;
+      margin-top: .25rem;
+    }
+    body.dark-mode #classesContainer {
+      background: var(--card-night);
+    }
+    .classes-list li {
+      padding: .5rem 0;
+      font-size: .9rem;
+      border-bottom: 1px solid #eee;
+      color: var(--dark);
+    }
+    body.dark-mode .classes-list li {
+      border-color: #333;
+      color: var(--text-night);
+    }
+
+    /* Détection */
+    .text-input {
+      width: 100%;
+      height: 120px;
+      padding: .75rem;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      resize: none;
+      font-size: 1rem;
+      margin-bottom: var(--gap);
+      transition: background .3s, color .3s, border-color .3s;
+    }
+    body.dark-mode .text-input {
+      background: #222;
+      color: var(--text-night);
+      border-color: #444;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      padding: .75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    .btn:hover {
+      background: #cf711c;
+    }
+    .result-box {
+      margin-top: var(--gap);
+      padding: var(--gap);
+      border-radius: var(--radius);
+      border: 1px solid #eee;
+      min-height: 2em;
+      transition: background .3s, color .3s, border-color .3s;
+    }
+    body.dark-mode .result-box {
+      background: #222;
+      color: var(--text-night);
+      border-color: #444;
+    }
+
+    /* Historique */
+    .history-list li {
+      padding: .5rem 0;
+      border-bottom: 1px solid #eee;
+      font-size: .9rem;
+      color: var(--dark);
+    }
+    body.dark-mode .history-list li {
+      border-color: #333;
+      color: var(--text-night);
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">LanguageID</div>
+    <div class="nav-item active" data-panel="dashboard">Dashboard</div>
+    <div class="nav-item" data-panel="detection">Détection</div>
+    <div class="nav-item" data-panel="history">Historique</div>
+  </aside>
+
+  <div class="main">
+    <header>
+      <div class="title">
+        <!-- Icône qui sera mise à jour dynamiquement -->
+        <img id="panelIcon"
+             src="https://img.icons8.com/ios-glyphs/30/ffffff/dashboard-layout.png"
+             alt="Icône panneau"
+             class="btn-icon"/>
+        <span id="panelTitle">Dashboard</span>
+      </div>
+      <div class="actions">
+        <button id="settingsToggle" class="icon-btn" aria-label="Réglages">
+          <img src="https://img.icons8.com/?size=100&id=2969&format=png&color=ffffff" alt="" class="btn-icon"/>
+        </button>
+        <div id="dropdown" class="action-dropdown">
+          <label><input type="checkbox" id="showConfidence" checked> Afficher score de confiance</label>
+          <label><input type="checkbox" id="enableHistory" checked> Activer historique</label>
+        </div>
+        <button id="themeToggle" class="icon-btn" aria-label="Changer thème">
+          <img src="https://img.icons8.com/?size=100&id=54382&format=png&color=ffffff" alt="" class="btn-icon"/>
+        </button>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="dashboard">
+        <div class="stats-grid">
+          <div class="card"><h3>Total des entrées du corpus</h3><p id="stat-total">—</p></div>
+          <div class="card"><h3>Nombre d’exemples d'entrainement</h3><p id="stat-split">—</p></div>
+          <div class="card"><h3>Nombre d’exemples de test</h3><p id="stat-splitt">—</p></div>
+          <div class="card"><h3>Époques</h3><p id="stat-epochs">—</p></div>
+          <div class="card"><h3>Couche entrée</h3><p id="stat-input-layer">— neurones</p></div>
+          <div class="card"><h3>Couche cachée</h3><p id="stat-hidden-layer">— neurones</p></div>
+          <div class="card"><h3>Couche sortie</h3><p id="stat-output-layer">— neurones</p></div>
+          <div class="card"><h3>Exactitude entraînement</h3><p id="stat-trainacc">—</p></div>
+          <div class="card"><h3>Exactitude test</h3><p id="stat-testacc">—</p></div>
+          <div class="card" id="classesCard">
+            <h3 class="card-title">
+              Classes
+              <button id="toggleClasses" class="icon-btn" aria-label="Afficher la liste des classes">
+                <img src="https://img.icons8.com/?size=100&id=26139&format=png&color=000000" alt="" class="btn-icon"/>
+              </button>
+            </h3>
+            <div id="classesContainer" class="hidden">
+              <ul id="classList" class="classes-list"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="detection" class="hidden">
+        <textarea id="inputText" class="text-input" placeholder="Entrez votre texte…"></textarea>
+        <button id="detectBtn" class="btn">Lancer la détection</button>
+        <div id="result" class="result-box">—</div>
+      </section>
+
+      <section id="history" class="hidden">
+        <h3>Historique des prédictions</h3>
+        <ul class="history-list" id="historyList"></ul>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const icons = {
+        dashboard: 'https://img.icons8.com/?size=100&id=uNaaq8c2jqFp&format=png&color=ffffff',
+        detection: 'https://img.icons8.com/?size=100&id=50Pum94Ds31f&format=png&color=ffffff',
+        history:   'https://img.icons8.com/ios-glyphs/30/ffffff/time-machine.png'
+      };
+
+      const panels      = ['dashboard','detection','history'];
+      const navItems    = document.querySelectorAll('.nav-item');
+      const panelIcon   = document.getElementById('panelIcon');
+      const panelTitle  = document.getElementById('panelTitle');
+      const dropdown    = document.getElementById('dropdown');
+      const settingsToggle = document.getElementById('settingsToggle');
+      const themeToggle    = document.getElementById('themeToggle');
+      const showConf      = document.getElementById('showConfidence');
+      const enHist        = document.getElementById('enableHistory');
+      const inputText     = document.getElementById('inputText');
+      const detectBtn     = document.getElementById('detectBtn');
+      const resultBox     = document.getElementById('result');
+      const historyList   = document.getElementById('historyList');
+      const historyData   = [];
+      const classListEl   = document.getElementById('classList');
+      const classesContainer = document.getElementById('classesContainer');
+      const toggleClasses   = document.getElementById('toggleClasses');
+
+      function showPanel(panel) {
+        panels.forEach(p =>
+          document.getElementById(p).classList.toggle('hidden', p !== panel)
+        );
+        navItems.forEach(i =>
+          i.classList.toggle('active', i.dataset.panel === panel)
+        );
+        panelTitle.textContent = panel.charAt(0).toUpperCase() + panel.slice(1);
+        panelIcon.src = icons[panel];
+      }
+
+      navItems.forEach(i =>
+        i.addEventListener('click', () => showPanel(i.dataset.panel))
+      );
+
+      settingsToggle.addEventListener('click', e => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+      });
+      document.addEventListener('click', () => dropdown.style.display = 'none');
+
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+      });
+
+      function fetchStats() {
+        fetch('/stats')
+          .then(r => r.json())
+          .then(s => {
+            document.getElementById('stat-total').textContent      = s.totalExamples;
+            document.getElementById('stat-split').textContent      = s.trainSize;
+            document.getElementById('stat-splitt').textContent     = s.testSize;
+            document.getElementById('stat-epochs').textContent     = s.epochs;
+            document.getElementById('stat-input-layer').textContent  = `${s.inputDim} neurones`;
+            document.getElementById('stat-hidden-layer').textContent = `${s.hiddenDim} neurones`;
+            document.getElementById('stat-output-layer').textContent = `${s.outputDim} neurones`;
+            document.getElementById('stat-trainacc').textContent   = `${(s.trainAcc*100).toFixed(2)}%`;
+            document.getElementById('stat-testacc').textContent    = `${(s.testAcc*100).toFixed(2)}%`;
+            classListEl.innerHTML = s.classes.map(c => `<li>${c}</li>`).join('');
+          });
+      }
+
+      detectBtn.addEventListener('click', () => {
+        const text = inputText.value.trim();
+        if (!text) return;
+        fetch('/classify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ text })
+        })
+        .then(r => r.json())
+        .then(d => {
+          let txt = d.language;
+          if (showConf.checked && d.confidence != null) {
+            txt += ` (${Math.round(d.confidence*100)}%)`;
+          }
+          resultBox.textContent = txt;
+          if (enHist.checked) {
+            historyData.unshift(`«${text}» → ${d.language}`);
+            if (historyData.length > 50) historyData.pop();
+            historyList.innerHTML = historyData.map(l => `<li>${l}</li>`).join('');
+          }
+        });
+      });
+
+      toggleClasses.addEventListener('click', e => {
+        e.stopPropagation();
+        classesContainer.classList.toggle('hidden');
+        const img = toggleClasses.querySelector('img');
+        img.style.transform = classesContainer.classList.contains('hidden')
+          ? 'rotate(0deg)' : 'rotate(180deg)';
+      });
+
+      // Initialisation
+      showPanel('dashboard');
+      fetchStats();
+    });
+  </script>
+</body>
+</html>
